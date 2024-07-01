@@ -1,22 +1,15 @@
-# Imagen base: Java 17 con Alpine (minimizada)
-FROM openjdk:17-jdk-alpine
+#
+# Build stage
+#
+FROM maven:4.0.0-jdk-17-slim AS build
+COPY src /home/app/src
+COPY pom.xml /home/app
+RUN mvn -f /home/app/pom.xml clean package
 
-# Establecemos el directorio de trabajo
-WORKDIR /app
 
-# Copiamos el archivo JAR de la aplicación
-COPY target/FactuPlus-0.0.1-SNAPSHOT.jar FactuPlus.jar
-
-# Copiamos el archivo de configuración
-#COPY ./application.properties /app/config/application.properties
-
-# Exponemos el puerto 8080
+# Package stage
+#
+FROM openjdk:17-jre-slim
+COPY --from=build /home/app/target/FactuPlus-0.0.1-SNAPSHOT.jar /usr/local/lib/FactuPlus.jar
 EXPOSE 8080
-
-# Comando para ejecutar la aplicación con el archivo de configuración externo
-#, "--spring.config.location=/app/config/application.properties"
-ENTRYPOINT ["java", "-jar", "FactuPlus.jar"]
-
-# Etiquetas: nombre y versión
-LABEL name="FactuPlus_img"
-LABEL version="latest"
+ENTRYPOINT ["java","-jar","/usr/local/lib/FactuPlus.jar"]
