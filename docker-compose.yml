@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  spring-boot-app:
+    build: .
+    image: factuplus_img:latest
+    container_name: factuplus_container
+    ports:
+      - "8080:8080"
+
+  spring-boot-app2:
+    build: .
+    image: factuplus_img:latest
+    container_name: factuplus_container2
+    ports:
+      - "8081:8080"
