@@ -6,7 +6,7 @@
 # We will call this sub-environment "build"
 # Copy all the contents of the repository
 # Run the mvn clean package command (It will generate a JAR file for deployment)
-FROM maven:4.0.0-jdk-17-alpine AS build
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 COPY . .
 RUN mvn clean package
 
