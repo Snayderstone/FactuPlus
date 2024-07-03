@@ -1,12 +1,20 @@
-FROM maven:4.0.0-jdk-17-alpine AS build
-COPY src /home/app/src
-COPY pom.xml /home/app
-RUN mvn -f /home/app/pom.xml clean package
-
-
-# Package stage
 #
-FROM openjdk:17-jre-alpine
-COPY --from=build /home/app/target/FactuPlus-0.0.1-SNAPSHOT.jar /usr/local/lib/FactuPlus.jar
+# Project build (Multi-Stage)
+# --------------------------------
+#
+# We use a Maven image to build the project with Java
+# We will call this sub-environment "build"
+# Copy all the contents of the repository
+# Run the mvn clean package command (It will generate a JAR file for deployment)
+FROM maven:4.0.0-jdk-17-alpine AS build AS build
+COPY . .
+RUN mvn clean package
+
+# We use an Openjdk image
+# We expose the port that our component will use to listen to requests
+# We copy from "build" the generated JAR (the generation path is the same as we would see locally) and we move and rename it in destination as app.jar
+# We mark the starting point of the image with the command "java -jar app.jar" that will execute our component.
+FROM openjdk:17
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/usr/local/lib/FactuPlus.jar"]
+COPY --from=build /target/FactuPlus-0.0.1-SNAPSHOT.jar app.jar
+ENTRYPOINT ["java", "-jar", "/app.jar"]
